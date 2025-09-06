@@ -4,27 +4,18 @@ workflows:
     max_build_duration: 60
     environment:
       flutter: stable
-      java: 17
-      vars:
-        GRADLE_OPTS: -Xmx4096m
+      xcode: latest
+      cocoapods: default
     scripts:
-      - name: Create Flutter project (if missing)
+      - name: Ensure Flutter project structure
         script: |
           if [ ! -d "android" ]; then
-            echo "No android folder found, creating full Flutter project..."
+            echo "⚡ android folder missing → running flutter create"
             flutter create .
           fi
-      - name: Overwrite with custom app code
-        script: |
-          echo "Placing custom app code..."
-          cp -f lib/main.dart lib/main.dart
-          cp -f pubspec.yaml pubspec.yaml
       - name: Get Flutter packages
         script: flutter pub get
       - name: Build Android APK
-        script: flutter build apk --release
-      - name: Build Android App Bundle
-        script: flutter build appbundle --release
+        script: flutter build apk --debug
     artifacts:
-      - build/app/outputs/flutter-apk/app-release.apk
-      - build/app/outputs/bundle/release/app-release.aab
+      - build/app/outputs/flutter-apk/app-debug.apk
