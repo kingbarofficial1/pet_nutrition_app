@@ -1,21 +1,60 @@
 workflows:
   android-workflow:
-    name: Android Build
+    name: Android Build (auto-create project)
     max_build_duration: 60
     environment:
       flutter: stable
-      xcode: latest
-      cocoapods: default
+      java: 17
+      vars:
+        GRADLE_OPTS: -Xmx4096m
     scripts:
-      - name: Ensure Flutter project structure
+      - name: Show repo contents
         script: |
-          if [ ! -d "android" ]; then
-            echo "⚡ android folder missing → running flutter create"
-            flutter create .
+          echo "PWD=$(pwd)"
+          echo "Repo files:"
+          ls -la
+      - name: Create full Flutter project if needed (in subfolder)
+        script: |
+          if [ ! -d "petapp/android" ]; then
+            echo "Creating fresh Flutter project at ./petapp ..."
+            flutter create petapp
           fi
-      - name: Get Flutter packages
-        script: flutter pub get
-      - name: Build Android APK
-        script: flutter build apk --debug
+      - name: Copy your code/pubspec/assets into petapp
+        script: |
+          # Ensure source files exist
+          test -f pubspec.yaml || (echo "pubspec.yaml missing at repo root" && exit 1)
+          test -d lib || (echo "lib/ folder missing at repo root" && exit 1)
+
+          # Copy files
+          rsync -av --delete lib/ petapp/lib/
+          cp -f pubspec.yaml petapp/pubspec.yaml
+
+          # Optional: copy assets if you have them
+          if [ -d assets ]; then
+            mkdir -p petapp/assets
+            rsync -av --delete assets/ petapp/assets/
+          fi
+
+          echo "Final petapp tree:"
+          ls -la petapp
+          ls -la petapp/android || true
+      - name: Gradle memory + AndroidX (just in case)
+        script: |
+          echo "org.gradle.jvmargs=-Xmx4096m -Dkotlin.daemon.jvm.options=-Xmx2048m" >> petapp/android/gradle.properties
+          echo "android.useAndroidX=true" >> petapp/android/gradle.properties
+          echo "android.enableJetifier=true" >> petapp/android/gradle.properties
+      - name: Get packages
+        script: |
+          cd petapp
+          flutter pub get
+      - name: Build APK (debug)
+        script: |
+          cd petapp
+          flutter build apk --debug
+      - name: Build AAB (release)
+        script: |
+          cd petapp
+          flutter build appbundle --release
     artifacts:
-      - build/app/outputs/flutter-apk/app-debug.apk
+      - petapp/build/app/outputs/flutter-apk/app-debug.apk
+      - petapp/build/app/outputs/bundle/release/app-release.aab
