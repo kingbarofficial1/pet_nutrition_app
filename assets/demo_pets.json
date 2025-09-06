@@ -1,0 +1,29 @@
+[
+  {
+    "id": "demo1",
+    "name": "Bruno",
+    "type": "Dog",
+    "breed": "Labrador Retriever",
+    "age": "Puppy",
+    "weight": 10.0,
+    "notes": "Puppy formula • 3-4 meals/day • 2.5 cups total"
+  },
+  {
+    "id": "demo2",
+    "name": "Misty",
+    "type": "Cat",
+    "breed": "Persian",
+    "age": "Adult",
+    "weight": 4.2,
+    "notes": "High-protein wet food • 180–220 g/day"
+  },
+  {
+    "id": "demo3",
+    "name": "Chotu",
+    "type": "Rabbit",
+    "breed": "Mixed",
+    "age": "Adult",
+    "weight": 1.8,
+    "notes": "Unlimited hay • Leafy greens • Avoid grains"
+  }
+]
