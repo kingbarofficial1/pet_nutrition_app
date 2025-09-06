@@ -1,18 +1,29 @@
-
 workflows:
-  android_ios_build:
-    name: Android & iOS Build
+  android-workflow:
+    name: Android Build
     max_build_duration: 60
     environment:
       flutter: stable
+      java: 17
+      vars:
+        GRADLE_OPTS: -Xmx4096m
     scripts:
-      - name: Create Flutter project structure
-        script: flutter create .
-      - name: Get dependencies
+      - name: Create Flutter project (if missing)
+        script: |
+          if [ ! -d "android" ]; then
+            echo "No android folder found, creating full Flutter project..."
+            flutter create .
+          fi
+      - name: Overwrite with custom app code
+        script: |
+          echo "Placing custom app code..."
+          cp -f lib/main.dart lib/main.dart
+          cp -f pubspec.yaml pubspec.yaml
+      - name: Get Flutter packages
         script: flutter pub get
-      - name: Build APK
+      - name: Build Android APK
         script: flutter build apk --release
-      - name: Build App Bundle
+      - name: Build Android App Bundle
         script: flutter build appbundle --release
     artifacts:
       - build/app/outputs/flutter-apk/app-release.apk
